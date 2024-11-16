@@ -21,7 +21,7 @@ private:
     #define GAIN_A128   1
     #define GAIN_B32    2
     #define GAIN_A64    3
-    
+
     uint8_t gain = GAIN_A128;
 
 public:
@@ -69,6 +69,7 @@ private:
             FastGPIO::Pin<clk>::setOutputValueHigh();
 
             // add a little stretch to the HIGH signal -- datasheet says minimum of 0.2 us
+            // (4) nop's is ~250us, plus the pin call puts us well over the minimum
             __asm__("nop");
             __asm__("nop");
             __asm__("nop");
@@ -84,7 +85,7 @@ private:
         {
             FastGPIO::Pin<clk>::setOutputValueHigh();
 
-            // add a little stretch to the HIGH signal -- datasheet says minimum of 0.2 us
+            // add a little stretch to the HIGH signal
             __asm__("nop");
             __asm__("nop");
             __asm__("nop");
@@ -100,7 +101,7 @@ private:
         {
             FastGPIO::Pin<clk>::setOutputValueHigh();
 
-            // add a little stretch to the HIGH signal -- datasheet says minimum of 0.2 us
+            // add a little stretch to the HIGH signal
             __asm__("nop");
             __asm__("nop");
             __asm__("nop");
