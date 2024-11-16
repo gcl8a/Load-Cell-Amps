@@ -1,25 +1,19 @@
 /**
- * A library for the ZSC31014 load cell amplifier, as found on, for example, the ...
+ * A library for the HX711 load cell amplifier.
+ * 
+ * https://cdn.sparkfun.com/assets/b/f/5/a/e/hx711F_EN.pdf
  */
-
 #pragma once
 
-#include <Arduino.h>
-
-class LoadCellAmp
-{
-private:
-    uint8_t address = 0x28; // Default address; can be changed
-
-public:
-    LoadCellAmp(void) {}
-    virtual bool Init(void) { return false; }
-
-};
+#include <LoadCell.h>
 
 class HX711 : public LoadCellAmp
 {
 private:
+    /**
+     * Though the chip has clock and data pins, it is not using I2C. You can use most 
+     * any pin for connections.
+     */
     // The clock pin is used to clock out data
     const uint8_t clkPin = -1;
 
@@ -33,7 +27,7 @@ public:
     bool GetReading(int32_t& reading)
     {
         bool retVal = false;
-        if(!digitalRead(dataPin))
+        if(!digitalRead(dataPin)) // LOW on the data line indicates new reading available
         {
             reading = ReadMeasurementAndCmdNextReading();
             retVal = true;

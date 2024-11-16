@@ -1,4 +1,4 @@
-#include <ZSC31014.h>
+#include <HX711.h>
 #include <FastGPIO.h>
 
 bool HX711::Init(void)
@@ -27,7 +27,7 @@ int32_t HX711::ReadMeasurementAndCmdNextReading(void)
         digitalWrite(clkPin, LOW);
         if(digitalRead(dataPin)) value |= (1ul << i);
     }
-    // command the next reading
+    // command the next reading - HARDCODED FOR 1 PULSE -> Gain = 128 on CH A
     digitalWrite(clkPin, HIGH);
     digitalWrite(clkPin, LOW);
 

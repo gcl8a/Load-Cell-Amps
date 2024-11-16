@@ -4,18 +4,7 @@
 
 #pragma once
 
-#include <Arduino.h>
-
-class LoadCellAmp
-{
-private:
-    uint8_t address = 0x28; // Default address; can be changed
-
-public:
-    LoadCellAmp(void) {}
-    virtual bool Init(void) { return false; }
-
-};
+#include <ZSC31014.h>
 
 class ZSC31014 : public LoadCellAmp
 {
