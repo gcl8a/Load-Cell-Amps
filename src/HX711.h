@@ -49,8 +49,9 @@ public:
         return retVal;
     }
     
-    void Sleep(void);   // not implemented, yet
-    void Wakeup(void);  // someday...
+    // The chip has simple sleep and wakeup protocols
+    void Sleep(void)    { FastGPIO::Pin<clk>::setOutputValueHigh(); }
+    void Wakeup(void)   { FastGPIO::Pin<clk>::setOutputValueLow(); }
 
 private:
     /**
