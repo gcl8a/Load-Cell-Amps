@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <ZSC31014.h>
+#include <LoadCell.h>
 
 class ZSC31014 : public LoadCellAmp
 {

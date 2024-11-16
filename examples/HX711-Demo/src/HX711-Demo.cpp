@@ -2,12 +2,12 @@
 
 #include <HX711.h>
 
-HX711 loadCellHX1(2, 3);
+HX711<5, 12> loadCellHX1;
 
 void setup() 
 {
   Serial.begin(250000);
-  while(!Serial) {}
+  //while(!Serial) {}
 
   Serial.println("setup()");
   loadCellHX1.Init();

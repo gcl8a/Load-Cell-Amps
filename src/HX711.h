@@ -6,34 +6,37 @@
 #pragma once
 
 #include <LoadCell.h>
+#include <FastGPIO.h>
 
-class HX711 : public LoadCellAmp
+/**
+ * Though the chip has clock and data pins, it is not using I2C. You can use most 
+ * any pin for connections. We use a template so we can use Pololu's FastGPIO library.
+ */
+
+template <uint8_t clk, uint8_t dat> class HX711 : public LoadCellAmp
 {
 private:
-    /**
-     * Though the chip has clock and data pins, it is not using I2C. You can use most 
-     * any pin for connections.
-     */
-    // The clock pin is used to clock out data
-    const uint8_t clkPin = -1;
-
-    // The data pin both indicates a new reading and is used to read data
-    uint8_t dataPin = -1;
 
     // For keeping track of the gain settings
-    // #define GAIN_A128   1
-    // #define GAIN_B32    2
-    // #define GAIN_A64    3
-    // uint8_t gain = GAIN_A128;
+    #define GAIN_A128   1
+    #define GAIN_B32    2
+    #define GAIN_A64    3
+    uint8_t gain = GAIN_A128;
 
 public:
-    HX711(uint8_t clk, uint8_t data) : clkPin(clk), dataPin(data) {}
-    virtual bool Init(void);
+    HX711(void) //uint8_t clk, uint8_t data) 
+    {
+        FastGPIO::Pin<clk>::setOutputLow();
+        FastGPIO::Pin<dat>::setInput();
+    }
+
+    virtual bool Init(void) {return true;}
+    uint8_t SetGain(uint8_t g) { if(g >= 1 && g <= 3) gain = g; return gain; }
 
     bool GetReading(int32_t& reading)
     {
         bool retVal = false;
-        if(!digitalRead(dataPin)) // LOW on the data line indicates new reading available
+        if(!FastGPIO::Pin<dat>::isInputHigh()) // LOW on the data line indicates new reading available
         {
             reading = ReadMeasurementAndCmdNextReading();
             retVal = true;
@@ -46,5 +49,72 @@ public:
     void Wakeup(void);
 
 private:
-    int32_t ReadMeasurementAndCmdNextReading(void);
+    /**
+     * ReadMeasurementAndCmdNextReading is blocking, but writing wo/blocking would 
+     * require setting up a timer and interrupts and it's not worth it for ~20us.
+     */
+    int32_t ReadMeasurementAndCmdNextReading(void)
+    {    
+        uint8_t highByte = 0;
+        uint8_t medByte = 0;
+        uint8_t lowByte = 0;
+    
+        for(uint8_t i = 0; i < 8; i++)
+        {
+            FastGPIO::Pin<clk>::setOutputValueHigh();
+
+            // add a little stretch to the HIGH signal -- datasheet says minimum of 0.2 us
+            __asm__("nop");
+            __asm__("nop");
+            __asm__("nop");
+            __asm__("nop");
+
+            FastGPIO::Pin<clk>::setOutputValueLow();
+
+            highByte <<= 1;
+            if(FastGPIO::Pin<dat>::isInputHigh()) highByte++;
+        }
+
+        for(uint8_t i = 0; i < 8; i++)
+        {
+            FastGPIO::Pin<clk>::setOutputValueHigh();
+
+            // add a little stretch to the HIGH signal -- datasheet says minimum of 0.2 us
+            __asm__("nop");
+            __asm__("nop");
+            __asm__("nop");
+            __asm__("nop");
+
+            FastGPIO::Pin<clk>::setOutputValueLow();
+
+            medByte <<= 1;
+            if(FastGPIO::Pin<dat>::isInputHigh()) medByte++;
+        }
+
+        for(uint8_t i = 0; i < 8; i++)
+        {
+            FastGPIO::Pin<clk>::setOutputValueHigh();
+
+            // add a little stretch to the HIGH signal -- datasheet says minimum of 0.2 us
+            __asm__("nop");
+            __asm__("nop");
+            __asm__("nop");
+            __asm__("nop");
+
+            FastGPIO::Pin<clk>::setOutputValueLow();
+
+            lowByte <<= 1;
+            if(FastGPIO::Pin<dat>::isInputHigh()) lowByte++;
+        }
+
+        // command the next reading -- see datasheet for how gain is set
+        for(uint8_t i = 0; i < gain; i++)
+        {
+            FastGPIO::Pin<5>::setOutputHigh();
+            FastGPIO::Pin<5>::setOutputLow();
+        }
+
+        int32_t value = ((uint32_t)highByte << 24) | ((uint32_t)medByte << 16) | ((uint32_t)lowByte << 8); 
+        return value / 256;
+    }
 };
