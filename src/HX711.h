@@ -69,7 +69,7 @@ private:
             FastGPIO::Pin<clk>::setOutputValueHigh();
 
             // add a little stretch to the HIGH signal -- datasheet says minimum of 0.2 us
-            // (4) nop's is ~250us, plus the pin call puts us well over the minimum
+            // (4) nop's is ~250ns, plus the pin call puts us well over the minimum
             __asm__("nop");
             __asm__("nop");
             __asm__("nop");
