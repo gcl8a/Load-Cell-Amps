@@ -24,13 +24,16 @@ private:
     uint8_t gain = GAIN_A128;
 
 public:
-    HX711(void) //uint8_t clk, uint8_t data) 
+    HX711(void) {}
+    
+    virtual bool Init(void) 
     {
         FastGPIO::Pin<clk>::setOutputLow();
         FastGPIO::Pin<dat>::setInput();
+
+        return true;
     }
 
-    virtual bool Init(void) {return true;}
     uint8_t SetGain(uint8_t g) { if(g >= 1 && g <= 3) gain = g; return gain; }
 
     bool GetReading(int32_t& reading)
@@ -54,7 +57,8 @@ private:
      * require setting up a timer and interrupts and it's not worth it for ~20us.
      */
     int32_t ReadMeasurementAndCmdNextReading(void)
-    {    
+    {   
+        // 32-bit manipulation is slow, so use three bytes to collect data
         uint8_t highByte = 0;
         uint8_t medByte = 0;
         uint8_t lowByte = 0;
@@ -110,8 +114,8 @@ private:
         // command the next reading -- see datasheet for how gain is set
         for(uint8_t i = 0; i < gain; i++)
         {
-            FastGPIO::Pin<5>::setOutputHigh();
-            FastGPIO::Pin<5>::setOutputLow();
+            FastGPIO::Pin<clk>::setOutputHigh();
+            FastGPIO::Pin<clk>::setOutputLow();
         }
 
         int32_t value = ((uint32_t)highByte << 24) | ((uint32_t)medByte << 16) | ((uint32_t)lowByte << 8); 
