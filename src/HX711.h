@@ -48,8 +48,8 @@ public:
         return retVal;
     }
     
-    void Sleep(void);
-    void Wakeup(void);
+    void Sleep(void);   // not implemented, yet
+    void Wakeup(void);  // someday...
 
 private:
     /**
@@ -118,6 +118,10 @@ private:
             FastGPIO::Pin<clk>::setOutputLow();
         }
 
+        /**
+         * Now assemble the result. Put into a 32-bit variable, _left aligned_ to maintain
+         * sign. Then divide by 256, also to maintain sign.
+         */
         int32_t value = ((uint32_t)highByte << 24) | ((uint32_t)medByte << 16) | ((uint32_t)lowByte << 8); 
         return value / 256;
     }
