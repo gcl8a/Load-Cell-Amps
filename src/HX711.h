@@ -21,6 +21,7 @@ private:
     #define GAIN_A128   1
     #define GAIN_B32    2
     #define GAIN_A64    3
+    
     uint8_t gain = GAIN_A128;
 
 public:
