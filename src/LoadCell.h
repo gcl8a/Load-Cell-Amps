@@ -8,6 +8,5 @@ private:
 
 public:
     LoadCellAmp(void) {}
-
-    virtual bool Init(void)  = 0; //{ return false; }
+    virtual bool Init(void) = 0;
 };
