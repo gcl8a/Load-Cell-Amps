@@ -5,6 +5,7 @@
  */
 #pragma once
 
+#include <Arduino.h>
 #include <LoadCell.h>
 #include <FastGPIO.h>
 
