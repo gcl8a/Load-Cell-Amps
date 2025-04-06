@@ -2,7 +2,7 @@
 
 #include <ZSC31014.h>
 
-HX711 loadCellHX1(2, 3);
+ZSC31014 loadCellHX1(2, 3);
 
 void setup() 
 {

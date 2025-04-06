@@ -1,7 +1,7 @@
 #include <ZSC31014.h>
 #include <FastGPIO.h>
 
-bool HX711::Init(void)
+bool ZSC31014::Init(void)
 {
     SerialUSB.println("HX711::Init()");
 
@@ -13,7 +13,7 @@ bool HX711::Init(void)
     return true;
 }
 
-int32_t HX711::ReadMeasurementAndCmdNextReading(void)
+int32_t ZSC31014::ReadMeasurementAndCmdNextReading(void)
 {
     int32_t value = 0;
     
