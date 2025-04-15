@@ -7,7 +7,6 @@
 
 #include <Arduino.h>
 #include <LoadCell.h>
-#include <FastGPIO.h>
 
 /**
  * Though the chip has clock and data pins, it is not using I2C. You can use most 
@@ -30,8 +29,10 @@ public:
     
     virtual bool Init(void) 
     {
-        FastGPIO::Pin<clk>::setOutputLow();
-        FastGPIO::Pin<dat>::setInput();
+        pinMode(clk, OUTPUT);
+        digitalWrite(clk, LOW);
+
+        pinMode(dat, INPUT);
 
         return true;
     }
@@ -51,8 +52,8 @@ public:
     }
     
     // The chip has simple sleep and wakeup protocols
-    void Sleep(void)    { FastGPIO::Pin<clk>::setOutputValueHigh(); }
-    void Wakeup(void)   { FastGPIO::Pin<clk>::setOutputValueLow(); }
+    void Sleep(void)    { digitalWrite(clk, HIGH); }
+    void Wakeup(void)   { digitalWrite(clk, LOW); }
 
 private:
     /**
@@ -68,7 +69,7 @@ private:
 
         for(uint8_t i = 0; i < 8; i++)
         {
-            FastGPIO::Pin<clk>::setOutputValueHigh();
+            digitalWrite(clk, HIGH);
 
             // add a little stretch to the HIGH signal -- datasheet says minimum of 0.2 us
             // (4) nop's is ~250ns, plus the pin call puts us well over the minimum
@@ -77,15 +78,15 @@ private:
             __asm__("nop");
             __asm__("nop");
 
-            FastGPIO::Pin<clk>::setOutputValueLow();
+            digitalWrite(clk, LOW);
 
             highByte <<= 1;
-            if(FastGPIO::Pin<dat>::isInputHigh()) highByte++;
+            if(digitalRead(dat)) highByte++;
         }
 
         for(uint8_t i = 0; i < 8; i++)
         {
-            FastGPIO::Pin<clk>::setOutputValueHigh();
+            digitalWrite(clk, HIGH);
 
             // add a little stretch to the HIGH signal
             __asm__("nop");
@@ -93,15 +94,15 @@ private:
             __asm__("nop");
             __asm__("nop");
 
-            FastGPIO::Pin<clk>::setOutputValueLow();
+            digitalWrite(clk, LOW);
 
             medByte <<= 1;
-            if(FastGPIO::Pin<dat>::isInputHigh()) medByte++;
+            if(digitalRead(dat)) medByte++;
         }
 
         for(uint8_t i = 0; i < 8; i++)
         {
-            FastGPIO::Pin<clk>::setOutputValueHigh();
+            digitalWrite(clk, HIGH);
 
             // add a little stretch to the HIGH signal
             __asm__("nop");
@@ -109,17 +110,21 @@ private:
             __asm__("nop");
             __asm__("nop");
 
-            FastGPIO::Pin<clk>::setOutputValueLow();
+            digitalWrite(clk, LOW);
 
             lowByte <<= 1;
-            if(FastGPIO::Pin<dat>::isInputHigh()) lowByte++;
+            if(digitalRead(dat)) lowByte++;
         }
 
         // command the next reading -- see datasheet for how gain is set
         for(uint8_t i = 0; i < gain; i++)
         {
-            FastGPIO::Pin<clk>::setOutputHigh();
-            FastGPIO::Pin<clk>::setOutputLow();
+            digitalWrite(clk, HIGH);
+            __asm__("nop");
+            __asm__("nop");
+            __asm__("nop");
+            __asm__("nop");
+            digitalWrite(clk, LOW);
         }
 
         /**
