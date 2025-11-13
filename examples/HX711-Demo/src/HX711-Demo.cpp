@@ -7,7 +7,6 @@ HX711<5, 12> loadCellHX1;
 void setup() 
 {
   Serial.begin(250000);
-  //while(!Serial) {}
 
   Serial.println("setup()");
   loadCellHX1.Init();
